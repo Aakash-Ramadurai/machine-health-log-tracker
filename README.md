@@ -163,7 +163,20 @@ All services used are within the **AWS Free Tier**:
 
 ## Screenshots
 
-*(Add screenshots of your running app here)*
+### Live web application
+![Live App](screenshots/app.png)
+
+### DynamoDB — 4 machine records
+![DynamoDB](screenshots/dynamodb.png)
+
+### EC2 — Instance running
+![EC2](screenshots/ec2.png)
+
+### S3 — Static website hosting enabled
+![S3](screenshots/s3.png)
+
+### IAM — EC2-DynamoDB-Role
+![IAM](screenshots/iam.png)
 
 ---
 
