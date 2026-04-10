@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Machine Health Log</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f4f4f4; }
+    h1 { color: #232f3e; }
+    h2 { color: #444; }
+    form { background: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    input, select, textarea { width: 100%; padding: 8px; margin: 6px 0 14px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { background: #ff9900; color: white; padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; }
+    button:hover { background: #e68900; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+    th { background: #232f3e; color: white; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #eee; }
+    tr:hover { background: #f9f9f9; }
+    .working { color: green; font-weight: bold; }
+    .faulty { color: red; font-weight: bold; }
+    .idle { color: orange; font-weight: bold; }
+    .msg { padding: 10px; border-radius: 4px; margin-bottom: 16px; background: #d4edda; color: #155724; display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>Machine Health Log Tracker</h1>
+
+  <h2>Log a Machine Inspection</h2>
+  <form id="logForm">
+    <label>Machine ID</label>
+    <input type="text" id="machineId" placeholder="e.g. M004" required />
+
+    <label>Machine Name</label>
+    <input type="text" id="machineName" placeholder="e.g. Conveyor Belt" required />
+
+    <label>Location</label>
+    <input type="text" id="location" placeholder="e.g. Building 2" required />
+
+    <label>Status</label>
+    <select id="status">
+      <option value="Working">Working</option>
+      <option value="Faulty">Faulty</option>
+      <option value="Idle">Idle</option>
+    </select>
+
+    <label>Inspected By</label>
+    <input type="text" id="inspectedBy" placeholder="Your name" required />
+
+    <label>Notes</label>
+    <textarea id="notes" rows="3" placeholder="Any observations..."></textarea>
+
+    <button type="submit">Submit Log</button>
+  </form>
+
+  <div class="msg" id="successMsg">Machine log saved successfully!</div>
+
+  <h2>All Machine Records</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Machine ID</th>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Inspected By</th>
+        <th>Time</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="machineTable"></tbody>
+  </table>
+
+  <script>
+    const API = "http://3.109.203.157:3000";
+
+    async function loadMachines() {
+      const res = await fetch(`${API}/machines`);
+      const machines = await res.json();
+      const tbody = document.getElementById("machineTable");
+      tbody.innerHTML = "";
+      machines.forEach(m => {
+        const statusClass = m.status.toLowerCase();
+        tbody.innerHTML += `
+          <tr>
+            <td>${m.machineId}</td>
+            <td>${m.machineName}</td>
+            <td>${m.location}</td>
+            <td class="${statusClass}">${m.status}</td>
+            <td>${m.inspectedBy}</td>
+            <td>${m.inspectionTime || "-"}</td>
+            <td>${m.notes}</td>
+          </tr>`;
+      });
+    }
+
+    document.getElementById("logForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const item = {
+        machineId: document.getElementById("machineId").value,
+        machineName: document.getElementById("machineName").value,
+        location: document.getElementById("location").value,
+        status: document.getElementById("status").value,
+        inspectedBy: document.getElementById("inspectedBy").value,
+        inspectionTime: new Date().toISOString(),
+        notes: document.getElementById("notes").value
+      };
+      await fetch(`${API}/machines`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(item)
+      });
+      const msg = document.getElementById("successMsg");
+      msg.style.display = "block";
+      setTimeout(() => msg.style.display = "none", 3000);
+      loadMachines();
+    });
+
+    loadMachines();
+  </script>
+</body>
+</html>
